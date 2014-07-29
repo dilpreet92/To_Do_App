@@ -1,0 +1,44 @@
+#container {
+  background-color: #85C285;
+}
+#upperContainer {
+  padding-top: 20px;
+  display: table;
+}
+#leftUpper {
+  width: 800px;
+  display: table-cell;
+  text-align: center;
+}
+#rightUpper {
+	width: 200px;
+  display: table-cell;
+}
+#lowerContainer {
+  display: table;
+   border-top: 1px solid black;
+}
+#leftLower {
+  width: 800px;
+  display: table-cell;
+}
+#rightLower {
+  width: 500px;
+  display: table-cell;
+  text-align: center;
+}
+input {
+  width: 200px;
+}
+ul {
+  list-style-type: none;
+}
+h3 {
+  text-align: center;
+}
+.checkbox {
+  background-color: yellow;
+}
+.lineThrough {
+  text-decoration: line-through;
+}
