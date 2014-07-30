@@ -32,7 +32,7 @@ ToDoApp.prototype.addToDropDownList = function(currentUserObject) {
 };
 
 ToDoApp.prototype.addToUsersList = function(currentUserObject) {
-  var currentListItem = $("<li/>").attr("id", currentUserObject.name);
+  var currentListItem = $("<li/>").data("dataitem", currentUserObject.name);
   currentListItem.text(currentUserObject.name);
   var counterTrack = $("<span/>").text("("+currentUserObject.toDos.length+")").insertAfter(currentListItem);
   this.usersListElement.append(currentListItem, counterTrack);
@@ -71,8 +71,12 @@ ToDoApp.prototype.addToDoList = function(currentToDoObject) {
 };
 
 ToDoApp.prototype.updateCounter = function(currentUserObject) {
-  var currentCounterElement = this.usersListElement.find("#"+currentUserObject.name+"").next("span");
-  currentCounterElement.text("("+currentUserObject.toDos.length+")");
+  $.each(this.usersListElement.find("li"), function(index,element) {
+    if($(this).text() == currentUserObject.name) {
+      var currentCounterElement = $(this).next("span");
+      currentCounterElement.text("("+currentUserObject.toDos.length+")");
+    }
+  });
 };
 
 ToDoApp.prototype.markText = function(currentCheckBoxElement) {
@@ -97,7 +101,7 @@ ToDoApp.prototype.checkUniqueName = function(nameInputElement) {
   }
   else {
     $.each(this.usersListElement.find("li") , function() {
-      if($(this).attr("id") == nameInputElement) {
+      if($(this).text() == nameInputElement) {
         alert("Please Enter Unique Name");
         returnValue = false;
       }
