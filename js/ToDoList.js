@@ -1,5 +1,6 @@
-function ToDoList (currentToDoItem, currentUser) {
+function ToDoList (currentToDoItem, currentUserObject) {
   this.description = currentToDoItem;
-  this.user = currentUser;
+  this.userObject = currentUserObject;
+  this.completed = false;
 };
 

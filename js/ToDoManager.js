@@ -10,7 +10,6 @@ function ToDoApp (elements) {
   this.toDoInputElement = elements.toDoInputElement;
   this.saveToDoButton = elements.saveToDoButton;
   this.dropDownListElement = elements.dropDownListElement;
-  this.users = [];
 }
 
 ToDoApp.prototype.init = function() {
@@ -21,74 +20,69 @@ ToDoApp.prototype.init = function() {
 
 ToDoApp.prototype.addUserName = function(currentUserName) {
   var userObj = new User(currentUserName);
-  this.users.push(userObj);
   this.addToUsersList(userObj);
   this.addToDropDownList(userObj); 
 };
 
 ToDoApp.prototype.addToDropDownList = function(currentUserObject) {
-  var currentOption = $("<option/>").text(currentUserObject.name);
+  var currentOption = $("<option/>").text(currentUserObject.name).data('user', currentUserObject);
   this.dropDownListElement.append(currentOption);
 };
 
 ToDoApp.prototype.addToUsersList = function(currentUserObject) {
-  var currentListItem = $("<li/>").data("dataitem", currentUserObject.name);
+  var currentListItem = $("<li/>");
   currentListItem.text(currentUserObject.name);
-  var counterTrack = $("<span/>").text("("+currentUserObject.toDos.length+")").insertAfter(currentListItem);
+  var counterTrack = $("<span/>").text("("+currentUserObject.toDos.length+")")
+                                 .insertAfter(currentListItem);
   this.usersListElement.append(currentListItem, counterTrack);
 };
 
 ToDoApp.prototype.addToDo = function() {
-  var toDoObj = new ToDoList(this.toDoInputElement.val(), this.dropDownListElement[0].value); 
+  var toDoObj = new ToDoList(this.toDoInputElement.val(), this.dropDownListElement.find("option:selected").data('user')); 
   this.addToDoList(toDoObj);
-  this.updateUserToDo(toDoObj, "+");
+  toDoObj.userObject.toDos.push(toDoObj);
+  this.incrementUserToDo(toDoObj);
 };
 
-ToDoApp.prototype.updateUserToDo = function(currentToDoObject, arithmeticOperation) {
-  var index = 0;
-  for(var i = 0; i < this.users.length; i++) {
-    if(this.users[i].name == currentToDoObject.user) {
-      index = i;
-      break;
-    }
-  }
-  if(arithmeticOperation == "+") {
-    this.users[index].toDos.push(currentToDoObject.description);
-  } 
-  else {
-    this.users[index].toDos.splice(this.users[index].toDos.indexOf(currentToDoObject.description), 1);
-  }
-  this.updateCounter(this.users[index]);
+ToDoApp.prototype.incrementUserToDo = function(currentToDoObject) { 
+    currentToDoObject.completed = false;
+    this.updateCounter(currentToDoObject);
+};
+
+ToDoApp.prototype.decrementUserToDo = function(currentToDoObject) {
+  currentToDoObject.completed = true;
+  this.updateCounter(currentToDoObject);
 };
 
 ToDoApp.prototype.addToDoList = function(currentToDoObject) {
   var currentListItem = $("<li/>"),
       checkboxElement = $("<input/>").attr("type", "checkbox").addClass("checkbox");
   currentListItem.append(checkboxElement);
-  currentListItem.append($("<span/>").text(currentToDoObject.description + " assigned by " + currentToDoObject.user));
-  checkboxElement.data("user", currentToDoObject);  
+  currentListItem.append($("<span/>").text(currentToDoObject.description + " assigned by " + currentToDoObject.userObject.name));
+  checkboxElement.data("toDoListObject", currentToDoObject);  
   this.toDoListElement.append(currentListItem);
 };
 
-ToDoApp.prototype.updateCounter = function(currentUserObject) {
+
+ToDoApp.prototype.updateCounter = function(currentToDoObject) {
   $.each(this.usersListElement.find("li"), function(index,element) {
-    if($(this).text() == currentUserObject.name) {
+    if($(this).text() == currentToDoObject.userObject.name) {
       var currentCounterElement = $(this).next("span");
-      currentCounterElement.text("("+currentUserObject.toDos.length+")");
+      currentCounterElement.text("("+currentToDoObject.userObject.getActiveToDo()+")");
     }
   });
 };
 
 ToDoApp.prototype.markText = function(currentCheckBoxElement) {
   var textElement = currentCheckBoxElement.next("span");
-      toDoObject = currentCheckBoxElement.data("user");
+      toDoObject = currentCheckBoxElement.data("toDoListObject");
   if(currentCheckBoxElement.context.checked) {
     textElement.addClass("lineThrough");
-    this.updateUserToDo(toDoObject, "-");
+    this.decrementUserToDo(toDoObject);
   }
   else {
     textElement.removeClass();
-    this.updateUserToDo(toDoObject, "+");
+    this.incrementUserToDo(toDoObject);
   }
 };
 
@@ -115,6 +109,7 @@ ToDoApp.prototype.checkUniqueName = function(nameInputElement) {
 
 ToDoApp.prototype.bindEvents = function() {
   var _this = this;
+  
   this.createUserButton.on("click",function() {
     _this.userAddSection.css("visibility", "visible");
     _this.createToDoButton.prop("disabled", true);
@@ -130,13 +125,8 @@ ToDoApp.prototype.bindEvents = function() {
   });
 
   this.createToDoButton.on("click", function() {
-    if(_this.users.length) {
       _this.addToDoContainer.css("visibility", "visible");
-      _this.createUserButton.prop("disabled", true);
-    }
-    else {
-      alert("Please Add Users First");
-    }  
+      _this.createUserButton.prop("disabled", true);  
   });
 
   this.saveToDoButton.on("click",function() {
